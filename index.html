@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winouuuu Ikar - Solution de Suivi de Bus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a6fb4;
+            --primary-dark: #0d5a9a;
+            --secondary: #ff9800;
+            --light: #f5f9ff;
+            --dark: #333;
+            --gray: #777;
+            --light-gray: #f0f0f0;
+        }
+        
+        body {
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+        
+        nav ul li {
+            margin-left: 25px;
+            position: relative;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 5px 0;
+            position: relative;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+        
+        nav ul li a.active {
+            color: var(--primary);
+        }
+        
+        nav ul li a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+        }
+        
+        .nav-auth-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: 20px;
+        }
+        
+        .nav-auth-buttons .btn-nav {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid;
+        }
+        
+        .btn-nav-login {
+            background-color: transparent;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-nav-login:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-nav-signup {
+            background-color: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .btn-nav-signup:hover {
+            background-color: #e68900;
+            border-color: #e68900;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 180px 0 120px;
+            margin-top: 70px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #e68900;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid white;
+            margin-left: 15px;
+        }
+        
+        .btn-outline:hover {
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        /* Section Styling */
+        section {
+            padding: 100px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* Features */
+        .features {
+            background-color: var(--light);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 40px 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-card i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        .feature-card p {
+            color: var(--gray);
+        }
+        
+        /* Products Section */
+        .products .section-title {
+            text-align: left;
+            margin-bottom: 40px;
+        }
+        
+        .products .section-title h2 {
+            margin-bottom: 10px;
+        }
+        
+        .product-desc {
+            margin-bottom: 60px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        /* About Section */
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+        
+        .about-text {
+            flex: 1;
+        }
+        
+        .about-text h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .about-text p {
+            color: var(--gray);
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .about-image {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Avis Section */
+        .avis-section {
+            background-color: var(--light);
+            padding: 80px 0;
+        }
+        
+        .avis-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .avis-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .avis-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .avis-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .avis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .avis-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .avis-user i {
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+        
+        .avis-user h4 {
+            margin: 0 0 5px 0;
+            color: var(--dark);
+        }
+        
+        .stars {
+            color: var(--secondary);
+        }
+        
+        .avis-date {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .avis-text {
+            color: var(--dark);
+            line-height: 1.6;
+            margin: 0;
+            font-style: italic;
+        }
+        
+        .avis-form-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .avis-form-container h3 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        /* Rating Stars */
+        .rating-stars {
+            direction: rtl;
+            text-align: left;
+            margin: 15px 0;
+        }
+        
+        .rating-stars input {
+            display: none;
+        }
+        
+        .rating-stars label {
+            color: #ddd;
+            font-size: 1.5rem;
+            padding: 0 5px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .rating-stars input:checked ~ label,
+        .rating-stars label:hover,
+        .rating-stars label:hover ~ label {
+            color: var(--secondary);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #1a1f2e;
+            color: white;
+            padding: 80px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: white;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--secondary);
+        }
+        
+        .footer-column p, .footer-column a {
+            color: #aaa;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            display: block;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-column a:hover {
+            color: var(--secondary);
+        }
+        
+        .contact-info {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .contact-info i {
+            margin-right: 15px;
+            color: var(--secondary);
+            margin-top: 5px;
+        }
+        
+        .newsletter-form input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: var(--dark);
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .form-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 3000;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .notification.error {
+            background-color: #f44336;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .about-content {
+                flex-direction: column;
+            }
+            
+            .about-image {
+                order: -1;
+            }
+            
+            .avis-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            nav ul {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 30px 0;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+                transition: left 0.3s;
+                z-index: 999;
+            }
+            
+            nav ul.active {
+                left: 0;
+            }
+            
+            nav ul li {
+                margin: 15px 0;
+            }
+            
+            .nav-auth-buttons {
+                margin-left: 0;
+                flex-direction: column;
+                gap: 15px;
+                width: 200px;
+            }
+            
+            .hero {
+                padding: 150px 0 100px;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            section {
+                padding: 80px 0;
+            }
+            
+            .section-title h2 {
+                font-size: 2rem;
+            }
+            
+            .avis-form-container {
+                padding: 20px;
+            }
+            
+            .hero-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                align-items: center;
+            }
+            
+            .hero-buttons .btn-outline {
+                margin-left: 0;
+            }
+            
+            .avis-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .avis-date {
+                align-self: flex-end;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            
+            .feature-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <div class="nav-container">
+                <div class="logo">
+                    <i class="fas fa-bus"></i>
+                    Winouuuu Ikar
+                </div>
+                
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <nav>
+                    <ul id="navMenu">
+                        <li><a href="#accueil" class="active">Accueil</a></li>
+                        <li><a href="#bienvenue">Fonctionnalités</a></li>
+                        <li><a href="#produits">Produits</a></li>
+                        <li><a href="#apropos">À propos</a></li>
+                        <li><a href="#avis">Avis</a></li>
+                        
+                        <!-- Boutons Login et Sign Up -->
+                        <li class="nav-auth-buttons">
+                            <a href="#" class="btn-nav btn-nav-login" id="loginBtn">Login</a>
+                            <a href="#" class="btn-nav btn-nav-signup" id="signupBtn">Sign Up</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="accueil">
+        <div class="container">
+            <h1>Découvrez Notre Solution de Suivi</h1>
+            <p>Suivez les bus en temps réel pour une expérience de voyage optimale et une planification efficace de vos déplacements.</p>
+            <div class="hero-buttons">
+                <a href="gps-tracker.html" class="btn">Accéder à la position des bus</a>
+                <a href="#avis" class="btn btn-outline">Voir les avis</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="bienvenue">
+        <div class="container">
+            <div class="section-title">
+                <h2>Notre Solution Complète</h2>
+                <p>Winouuuu Ikar offre des systèmes avancés de suivi des bus pour améliorer l'expérience des passagers.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h3>Suivi en Temps Réel</h3>
+                    <p>Obtenez des mises à jour en direct sur la position actuelle des bus, les temps d'arrivée estimés et les itinéraires.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>Informations Précises</h3>
+                    <p>Accédez à des détails essentiels sur les itinéraires, les arrêts, les horaires et les conditions de circulation.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-comments"></i>
+                    <h3>Communication Fluide</h3>
+                    <p>Assurez une communication transparente avec le serveur GPS pour une coordination efficace des bus.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="produits">
+        <div class="container">
+            <div class="section-title">
+                <h2>Solutions de Sécurité</h2>
+            </div>
+            
+            <p class="product-desc">
+                Winouuuu Ikar offre des systèmes avancés de suivi des bus pour améliorer l'expérience des passagers. Notre application web permet de visualiser les positions des bus en temps réel, d'accéder aux informations sur les itinéraires et de garantir une communication efficace grâce à un serveur GPS performant.
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-satellite-dish"></i>
+                    <h3>Positionnement Instantané</h3>
+                    <p>Technologie GPS de pointe pour un suivi précis et en temps réel de tous les véhicules de votre flotte.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Optimisation des Itinéraires</h3>
+                    <p>Analyses avancées pour optimiser les trajets, réduire les temps de parcours et améliorer la ponctualité.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Sécurité Renforcée</h3>
+                    <p>Surveillance continue pour garantir la sécurité des passagers et du personnel en toutes circonstances.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="apropos">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Notre Engagement</h2>
+                    <p>
+                        Winouuuu Ikar est un fournisseur de premier plan de systèmes de suivi des bus, créant des solutions innovantes pour optimiser les réseaux de transport public. Notre objectif est d'améliorer l'efficacité des déplacements en offrant une technologie avancée et conviviale pour tous les utilisateurs.
+                    </p>
+                    <p style="margin-top: 20px;">
+                        Depuis notre création, nous nous engageons à fournir des solutions fiables et performantes qui répondent aux besoins des compagnies de transport et des passagers. Notre équipe d'experts travaille constamment à l'amélioration de nos technologies pour offrir une expérience de voyage optimale.
+                    </p>
+                </div>
+                
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Système de suivi de bus">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Avis Section -->
+    <section class="avis-section" id="avis">
+        <div class="container">
+            <div class="section-title">
+                <h2>Avis des Utilisateurs</h2>
+                <p>Découvrez ce que pensent nos utilisateurs de notre système de suivi GPS.</p>
+            </div>
+            
+            <div class="avis-container">
+                <!-- Avis existants -->
+                <div class="avis-list" id="avisList">
+                    <div class="avis-card">
+                        <div class="avis-header">
+                            <div class="avis-user">
+                                <i class="fas fa-user-circle"></i>
+                                <div>
+                                    <h4>Mohamed T.</h4>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="avis-date">15 Mars 2024</span>
+                        </div>
+                        <p class="avis-text">"Excellent système de suivi ! En tant que conducteur de bus, cela m'aide énormément à optimiser mes trajets et à fournir un meilleur service aux passagers."</p>
+                    </div>
+                    
+                    <div class="avis-card">
+                        <div class="avis-header">
+                            <div class="avis-user">
+                                <i class="fas fa-user-circle"></i>
+                                <div>
+                                    <h4>Sarah K.</h4>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="avis-date">10 Mars 2024</span>
+                        </div>
+                        <p class="avis-text">"En tant que passagère quotidienne, cette application a transformé mon expérience de transport. Je peux maintenant planifier mes déplacements avec précision."</p>
+                    </div>
+                    
+                    <div class="avis-card">
+                        <div class="avis-header">
+                            <div class="avis-user">
+                                <i class="fas fa-user-circle"></i>
+                                <div>
+                                    <h4>Ali M.</h4>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="avis-date">5 Mars 2024</span>
+                        </div>
+                        <p class="avis-text">"Système très fiable et précis. La mise à jour en temps réel est impressionnante. Je recommande vivement à toutes les compagnies de transport."</p>
+                    </div>
+                </div>
+                
+                <!-- Formulaire pour ajouter un avis -->
+                <div class="avis-form-container">
+                    <h3>Donnez votre avis</h3>
+                    <form id="avisForm">
+                        <div class="form-group">
+                            <label for="avisName">Nom *</label>
+                            <input type="text" id="avisName" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="avisEmail">Email *</label>
+                            <input type="email" id="avisEmail" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Note *</label>
+                            <div class="rating-stars">
+                                <input type="radio" id="star5" name="rating" value="5" required>
+                                <label for="star5"><i class="fas fa-star"></i></label>
+                                
+                                <input type="radio" id="star4" name="rating" value="4">
+                                <label for="star4"><i class="fas fa-star"></i></label>
+                                
+                                <input type="radio" id="star3" name="rating" value="3">
+                                <label for="star3"><i class="fas fa-star"></i></label>
+                                
+                                <input type="radio" id="star2" name="rating" value="2">
+                                <label for="star2"><i class="fas fa-star"></i></label>
+                                
+                                <input type="radio" id="star1" name="rating" value="1">
+                                <label for="star1"><i class="fas fa-star"></i></label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="avisMessage">Votre avis *</label>
+                            <textarea id="avisMessage" name="message" rows="4" placeholder="Partagez votre expérience avec notre système..." required></textarea>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="avisPublic" name="public" checked>
+                            <label for="avisPublic">Rendre mon avis public</label>
+                        </div>
+                        
+                        <button type="submit" class="btn">
+                            <i class="fas fa-paper-plane"></i> Publier mon avis
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Winouuuu Ikar</h3>
+                    <div class="contact-info">
+                        <i class="fas fa-phone"></i>
+                        <span>01 23 45 67 89</span>
+                    </div>
+                    <div class="contact-info">
+                        <i class="fas fa-envelope"></i>
+                        <span>info@monsite.com</span>
+                    </div>
+                    <div class="contact-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Gabès, Tunisie</span>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Informations Utiles</h3>
+                    <a href="#">Politique de confidentialité</a>
+                    <a href="#">Déclaration d'accessibilité</a>
+                    <a href="#apropos">À propos de nous</a>
+                    <a href="#avis">Voir les avis</a>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Newsletter</h3>
+                    <p>Abonnez-vous à notre newsletter pour recevoir les dernières actualités sur nos solutions de suivi.</p>
+                    <form class="newsletter-form" id="footerNewsletterForm">
+                        <input type="email" placeholder="Votre email" required>
+                        <button type="submit" class="btn">S'abonner</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                © 2024 par Winouuuu Ikar. Tous droits réservés.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal pour Login/Signup -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Connexion / Inscription</h3>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-tabs">
+                    <button class="tab-btn active" data-tab="login">Connexion</button>
+                    <button class="tab-btn" data-tab="signup">Inscription</button>
+                </div>
+                
+                <!-- Login Form -->
+                <div class="tab-content active" id="loginTab">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Email *</label>
+                            <input type="email" id="loginEmail" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="loginPassword">Mot de passe *</label>
+                            <input type="password" id="loginPassword" name="password" required>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="rememberMe" name="rememberMe">
+                            <label for="rememberMe">Se souvenir de moi</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Se connecter</button>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <a href="#" style="color: var(--primary);">Mot de passe oublié ?</a>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Signup Form -->
+                <div class="tab-content" id="signupTab">
+                    <form id="signupForm">
+                        <div class="form-group">
+                            <label for="signupName">Nom complet *</label>
+                            <input type="text" id="signupName" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="signupEmail">Email *</label>
+                            <input type="email" id="signupEmail" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="signupPassword">Mot de passe *</label>
+                            <input type="password" id="signupPassword" name="password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="signupConfirmPassword">Confirmer le mot de passe *</label>
+                            <input type="password" id="signupConfirmPassword" name="confirmPassword" required>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="terms" name="terms" required>
+                            <label for="terms">J'accepte les <a href="#" style="color: var(--primary);">conditions d'utilisation</a> *</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">S'inscrire</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <p>En continuant, vous acceptez notre politique de confidentialité.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Notification system
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification' + (isError ? ' error' : '');
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            
+            const icon = mobileMenuBtn.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+        
+        // Close menu when clicking on a link
+        const navLinks = document.querySelectorAll('nav ul li a:not(.btn-nav)');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                const icon = mobileMenuBtn.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+                
+                navLinks.forEach(item => item.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+        
+        // Newsletter Form submission
+        const footerNewsletterForm = document.getElementById('footerNewsletterForm');
+        footerNewsletterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = footerNewsletterForm.querySelector('input[type="email"]').value;
+            showNotification(`Merci pour votre inscription à notre newsletter!`);
+            footerNewsletterForm.reset();
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Highlight active section in navigation
+        window.addEventListener('scroll', () => {
+            let current = '';
+            const sections = document.querySelectorAll('section');
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                
+                if(scrollY >= (sectionTop - 100)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        // Form submission for avis
+        const avisForm = document.getElementById('avisForm');
+        avisForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Récupérer la note sélectionnée
+            const ratingInput = document.querySelector('input[name="rating"]:checked');
+            if (!ratingInput) {
+                showNotification('Veuillez sélectionner une note', true);
+                return;
+            }
+            
+            const formData = {
+                name: document.getElementById('avisName').value,
+                email: document.getElementById('avisEmail').value,
+                rating: ratingInput.value,
+                message: document.getElementById('avisMessage').value,
+                public: document.getElementById('avisPublic').checked
+            };
+            
+            try {
+                const response = await fetch('/api/avis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message);
+                    
+                    // Ajouter le nouvel avis à la liste
+                    addAvisToList(formData);
+                    
+                    // Réinitialiser le formulaire
+                    avisForm.reset();
+                    
+                    // Décocher toutes les étoiles
+                    document.querySelectorAll('input[name="rating"]').forEach(radio => {
+                        radio.checked = false;
+                    });
+                } else {
+                    showNotification(data.error, true);
+                }
+            } catch (error) {
+                showNotification('Erreur de connexion au serveur', true);
+                console.error('Error:', error);
+            }
+        });
+        
+        // Fonction pour ajouter un avis à la liste
+        function addAvisToList(avis) {
+            const avisList = document.getElementById('avisList');
+            
+            // Créer les étoiles
+            let starsHTML = '';
+            const rating = parseInt(avis.rating);
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    starsHTML += '<i class="fas fa-star"></i>';
+                } else {
+                    starsHTML += '<i class="far fa-star"></i>';
+                }
+            }
+            
+            const avisCard = document.createElement('div');
+            avisCard.className = 'avis-card';
+            avisCard.innerHTML = `
+                <div class="avis-header">
+                    <div class="avis-user">
+                        <i class="fas fa-user-circle"></i>
+                        <div>
+                            <h4>${avis.name}</h4>
+                            <div class="stars">
+                                ${starsHTML}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="avis-date">${new Date().toLocaleDateString('fr-FR')}</span>
+                </div>
+                <p class="avis-text">"${avis.message}"</p>
+            `;
+            
+            // Ajouter en premier
+            avisList.prepend(avisCard);
+        }
+        
+        // Charger les avis existants au démarrage
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/avis');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    // Les avis sont déjà affichés dans le HTML
+                    // On pourrait les charger dynamiquement ici si nécessaire
+                    console.log(`${data.count} avis chargés`);
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des avis:', error);
+            }
+            
+            // Modal functionality for Login/Signup
+            const loginBtn = document.getElementById('loginBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            const authModal = document.getElementById('authModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Open modal for login
+            loginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                authModal.style.display = 'flex';
+                switchTab('login');
+            });
+            
+            // Open modal for signup
+            signupBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                authModal.style.display = 'flex';
+                switchTab('signup');
+            });
+            
+            // Close modal
+            closeModalBtn.addEventListener('click', () => {
+                authModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            authModal.addEventListener('click', (e) => {
+                if (e.target === authModal) {
+                    authModal.style.display = 'none';
+                }
+            });
+            
+            // Switch between tabs
+            function switchTab(tabName) {
+                tabBtns.forEach(btn => {
+                    if (btn.dataset.tab === tabName) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
+                tabContents.forEach(content => {
+                    if (content.id === `${tabName}Tab`) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Tab switching
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchTab(btn.dataset.tab);
+                });
+            });
+            
+            // Form submission for login
+            const loginForm = document.getElementById('loginForm');
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showNotification(data.message);
+                        authModal.style.display = 'none';
+                        loginForm.reset();
+                        
+                        // Update UI to show logged in state
+                        loginBtn.textContent = 'Mon Compte';
+                        signupBtn.textContent = 'Déconnexion';
+                        
+                        // Store user info
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        localStorage.setItem('token', data.token);
+                    } else {
+                        showNotification(data.error, true);
+                    }
+                } catch (error) {
+                    showNotification('Erreur de connexion au serveur', true);
+                    console.error('Error:', error);
+                }
+            });
+            
+            // Form submission for signup
+            const signupForm = document.getElementById('signupForm');
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('signupConfirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    showNotification('Les mots de passe ne correspondent pas', true);
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showNotification(data.message);
+                        authModal.style.display = 'none';
+                        signupForm.reset();
+                        
+                        // Auto-login after registration
+                        loginBtn.textContent = name.split(' ')[0];
+                        signupBtn.textContent = 'Déconnexion';
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                    } else {
+                        showNotification(data.error, true);
+                    }
+                } catch (error) {
+                    showNotification('Erreur de connexion au serveur', true);
+                    console.error('Error:', error);
+                }
+            });
+            
+            // Check if user is already logged in
+            const user = localStorage.getItem('user');
+            if (user) {
+                const userData = JSON.parse(user);
+                loginBtn.textContent = userData.name.split(' ')[0];
+                signupBtn.textContent = 'Déconnexion';
+                
+                // Change logout behavior
+                signupBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('token');
+                    loginBtn.textContent = 'Login';
+                    signupBtn.textContent = 'Sign Up';
+                    showNotification('Déconnexion réussie');
+                });
+            }
+            
+            // Test server connection
+            fetch('/api/health')
+                .then(response => response.json())
+                .then(data => console.log('Serveur connecté:', data.message))
+                .catch(error => console.warn('Impossible de contacter le serveur:', error));
+        });
+    </script>
+</body>
+</html>

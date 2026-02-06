@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi GPS Temps Réel - Winouuuu Ikar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS avec source de secours -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a6fb4;
+            --primary-dark: #0d5a9a;
+            --secondary: #ff9800;
+            --light: #f5f9ff;
+            --dark: #333;
+            --gray: #777;
+        }
+        
+        body {
+            background-color: #f5f9ff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e68900;
+        }
+        
+        /* Carte */
+        #map {
+            height: calc(100vh - 70px);
+            margin-top: 70px;
+            width: 100%;
+            z-index: 1;
+            background-color: #e0e0e0;
+        }
+        
+        /* Message d'erreur */
+        .map-error {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 100;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .sidebar {
+            position: fixed;
+            right: 20px;
+            top: 90px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sidebar-header h3 {
+            color: var(--primary);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+        
+        .bus-list {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .bus-list h4 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .bus-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .bus-item:hover {
+            background-color: #e9ecef;
+            transform: translateX(-5px);
+        }
+        
+        .bus-item.active {
+            border-left-color: var(--primary);
+            background-color: #e3f2fd;
+        }
+        
+        .bus-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .bus-id {
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .status-active {
+            background-color: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background-color: #f44336;
+        }
+        
+        .bus-speed {
+            background-color: var(--primary);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .bus-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 8px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .info-item i {
+            color: var(--primary);
+            width: 16px;
+        }
+        
+        .bus-time {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 3000;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .notification.error {
+            background-color: #f44336;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Loading */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 2001;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Legend */
+        .legend {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            font-size: 0.9rem;
+        }
+        
+        .legend h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        
+        .legend-bus {
+            background-color: var(--primary);
+        }
+        
+        .legend-simulated {
+            background-color: var(--secondary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: calc(100% - 40px);
+                bottom: 20px;
+                top: auto;
+                right: 20px;
+                max-height: 200px;
+            }
+            
+            #map {
+                height: calc(100vh - 270px);
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+            
+            .legend {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .header {
+                padding: 10px 15px;
+            }
+            
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .sidebar {
+                width: calc(100% - 20px);
+                right: 10px;
+                bottom: 10px;
+            }
+            
+            #map {
+                height: calc(100vh - 60px);
+                margin-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p>Chargement des données...</p>
+    </div>
+    
+    <!-- Message d'erreur -->
+    <div class="map-error" id="mapError">
+        <h3><i class="fas fa-exclamation-triangle"></i> Carte non disponible</h3>
+        <p>La carte ne peut pas être chargée. Voici quelques solutions :</p>
+        <ul style="text-align: left; margin: 15px 0; padding-left: 20px;">
+            <li>Vérifiez votre connexion Internet</li>
+            <li>Cliquez sur "Réessayer" ci-dessous</li>
+            <li>Utilisez la version simplifiée sans carte</li>
+        </ul>
+        <button onclick="retryMapLoad()" class="btn btn-primary" style="margin-top: 15px;">
+            <i class="fas fa-redo"></i> Réessayer
+        </button>
+        <button onclick="location.href='/simple-gps'" class="btn btn-secondary" style="margin-top: 10px;">
+            <i class="fas fa-list"></i> Version simplifiée
+        </button>
+    </div>
+    
+    <!-- En-tête -->
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-bus"></i>
+            Winouuuu Ikar - Suivi GPS
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="simulateBuses()">
+                <i class="fas fa-play"></i> Simuler des bus
+            </button>
+            <button class="btn btn-secondary" onclick="showAddDeviceModal()">
+                <i class="fas fa-plus"></i> Ajouter un appareil
+            </button>
+            <button class="btn btn-primary" onclick="window.location.href='/'">
+                <i class="fas fa-arrow-left"></i> Retour au site
+            </button>
+        </div>
+    </div>
+    
+    <!-- Carte -->
+    <div id="map"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-map-marker-alt"></i> Bus en ligne</h3>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalBuses">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="activeBuses">0</div>
+                    <div class="stat-label">Actifs</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bus-list">
+            <h4>Liste des véhicules</h4>
+            <div id="busListContent">
+                <p style="text-align: center; color: var(--gray); padding: 20px;">
+                    <i class="fas fa-bus" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    Aucun bus suivi pour le moment...
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Légende -->
+    <div class="legend">
+        <h4>Légende</h4>
+        <div class="legend-item">
+            <div class="legend-color legend-bus"></div>
+            <span>Bus réel</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color legend-simulated"></div>
+            <span>Bus simulé</span>
+        </div>
+        <div class="legend-item">
+            <div class="status-indicator status-active"></div>
+            <span>Actif (5 min)</span>
+        </div>
+    </div>
+    
+    <!-- Modal pour ajouter un appareil -->
+    <div class="modal-overlay" id="addDeviceModal">
+        <div class="modal">
+            <h3>Ajouter un nouvel appareil</h3>
+            <form id="addDeviceForm">
+                <div class="form-group">
+                    <label for="deviceId">ID de l'appareil *</label>
+                    <input type="text" id="deviceId" placeholder="Ex: bus_001" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="deviceLat">Latitude *</label>
+                    <input type="number" id="deviceLat" step="0.000001" placeholder="33.880000" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="deviceLon">Longitude *</label>
+                    <input type="number" id="deviceLon" step="0.000001" placeholder="10.100000" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="deviceSpeed">Vitesse (km/h)</label>
+                    <input type="number" id="deviceSpeed" placeholder="50">
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="button" class="btn" onclick="hideAddDeviceModal()" style="background-color: #ccc;">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Ajouter l'appareil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaflet JS avec source de secours -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    
+    <script>
+        // Variables globales
+        let map = null;
+        const markers = {};
+        let updateInterval = null;
+        
+        // Fonctions utilitaires
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification' + (isError ? ' error' : '');
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        function retryMapLoad() {
+            location.reload();
+        }
+        
+        // Initialiser la carte
+        function initializeMap() {
+            try {
+                // Vérifier si Leaflet est chargé
+                if (typeof L === 'undefined') {
+                    throw new Error('Leaflet non chargé');
+                }
+                
+                // Créer la carte centrée sur Gabès, Tunisie
+                map = L.map('map').setView([33.88, 10.1], 13);
+                
+                // Essayer différentes sources de tuiles
+                const tileLayers = [
+                    {
+                        name: 'OpenStreetMap',
+                        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        attribution: '© OpenStreetMap contributors'
+                    },
+                    {
+                        name: 'CartoDB Light',
+                        url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                        attribution: '© OpenStreetMap, © CartoDB'
+                    },
+                    {
+                        name: 'OSM France',
+                        url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+                        attribution: '© OpenStreetMap France'
+                    }
+                ];
+                
+                // Ajouter la première couche qui fonctionne
+                let layerAdded = false;
+                for (const layer of tileLayers) {
+                    try {
+                        L.tileLayer(layer.url, {
+                            maxZoom: 19,
+                            attribution: layer.attribution
+                        }).addTo(map);
+                        layerAdded = true;
+                        console.log(`Carte chargée avec: ${layer.name}`);
+                        break;
+                    } catch (e) {
+                        console.warn(`Échec avec ${layer.name}:`, e);
+                    }
+                }
+                
+                if (!layerAdded) {
+                    // Afficher une grille de base
+                    showBasicGrid();
+                }
+                
+                // Masquer l'erreur si affichée
+                document.getElementById('mapError').style.display = 'none';
+                
+                // Démarrer les mises à jour
+                startUpdates();
+                
+            } catch (error) {
+                console.error('Erreur d\'initialisation de la carte:', error);
+                document.getElementById('mapError').style.display = 'block';
+                showNotification('Impossible de charger la carte', true);
+            }
+        }
+        
+        // Afficher une grille de base si pas de tuiles
+        function showBasicGrid() {
+            const mapDiv = document.getElementById('map');
+            mapDiv.innerHTML = `
+                <div style="position: relative; width: 100%; height: 100%; background: #f0f0f0;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                        <i class="fas fa-map" style="font-size: 3rem; color: #666; margin-bottom: 20px;"></i>
+                        <h3 style="color: #333;">Carte hors ligne</h3>
+                        <p style="color: #666;">Les marqueurs de bus seront affichés ici</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Créer une icône personnalisée
+        function createBusIcon(isSimulated = false, isActive = true) {
+            const color = isSimulated ? '#ff9800' : '#1a6fb4';
+            const size = isActive ? 40 : 30;
+            const opacity = isActive ? 1 : 0.7;
+            
+            return L.divIcon({
+                html: `
+                    <div style="
+                        background-color: ${color}; 
+                        color: white; 
+                        width: ${size}px; 
+                        height: ${size}px; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: ${size * 0.45}px; 
+                        border: 3px solid white; 
+                        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+                        opacity: ${opacity};
+                    ">
+                        <i class="fas fa-bus"></i>
+                    </div>
+                `,
+                className: 'bus-marker',
+                iconSize: [size, size],
+                iconAnchor: [size/2, size/2]
+            });
+        }
+        
+        // Démarrer les mises à jour périodiques
+        function startUpdates() {
+            // Mettre à jour immédiatement
+            updatePositions();
+            
+            // Puis toutes les 3 secondes
+            updateInterval = setInterval(updatePositions, 3000);
+        }
+        
+        // Arrêter les mises à jour
+        function stopUpdates() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+        
+        // Mettre à jour les positions
+        async function updatePositions() {
+            try {
+                const response = await fetch('/api/positions');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Mettre à jour les statistiques
+                    document.getElementById('totalBuses').textContent = data.count;
+                    
+                    // Calculer les bus actifs (mis à jour il y a moins de 5 minutes)
+                    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+                    const activeBuses = data.data.filter(bus => 
+                        new Date(bus.timestamp) > fiveMinutesAgo
+                    ).length;
+                    document.getElementById('activeBuses').textContent = activeBuses;
+                    
+                    // Mettre à jour la liste des bus
+                    updateBusList(data.data);
+                    
+                    // Mettre à jour les marqueurs sur la carte
+                    if (map) {
+                        updateMapMarkers(data.data);
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour des positions:', error);
+                if (!updateInterval) {
+                    showNotification('Problème de connexion au serveur', true);
+                }
+            }
+        }
+        
+        // Mettre à jour la liste des bus
+        function updateBusList(buses) {
+            const busListContent = document.getElementById('busListContent');
+            
+            if (!buses || buses.length === 0) {
+                busListContent.innerHTML = `
+                    <p style="text-align: center; color: var(--gray); padding: 20px;">
+                        <i class="fas fa-bus" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        Aucun bus suivi pour le moment...
+                    </p>
+                `;
+                return;
+            }
+            
+            // Trier par dernier mis à jour
+            buses.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            busListContent.innerHTML = '';
+            
+            buses.forEach(bus => {
+                const isSimulated = bus.simulated || false;
+                const lastUpdate = new Date(bus.timestamp);
+                const now = new Date();
+                const minutesAgo = Math.floor((now - lastUpdate) / 60000);
+                const isActive = minutesAgo <= 5;
+                
+                const busItem = document.createElement('div');
+                busItem.className = 'bus-item';
+                if (isActive) busItem.classList.add('active');
+                
+                busItem.innerHTML = `
+                    <div class="bus-header">
+                        <div class="bus-id">
+                            <span class="status-indicator ${isActive ? 'status-active' : 'status-inactive'}"></span>
+                            <i class="fas fa-bus"></i> ${bus.device_id}
+                            ${isSimulated ? '<span style="font-size: 0.7rem; background: #ff9800; color: white; padding: 2px 6px; border-radius: 10px; margin-left: 5px;">SIM</span>' : ''}
+                        </div>
+                        <div class="bus-speed">
+                            ${bus.speed ? Math.round(bus.speed) + ' km/h' : '--'}
+                        </div>
+                    </div>
+                    <div class="bus-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${bus.latitude.toFixed(4)}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${bus.longitude.toFixed(4)}</span>
+                        </div>
+                    </div>
+                    <div class="bus-time">
+                        <i class="far fa-clock"></i>
+                        ${isActive ? 'Actif' : 'Inactif'} - il y a ${minutesAgo} min
+                    </div>
+                `;
+                
+                // Centrer sur le bus quand on clique
+                busItem.addEventListener('click', () => {
+                    centerOnBus(bus.device_id);
+                });
+                
+                busListContent.appendChild(busItem);
+            });
+        }
+        
+        // Mettre à jour les marqueurs sur la carte
+        function updateMapMarkers(buses) {
+            buses.forEach(bus => {
+                const isSimulated = bus.simulated || false;
+                const lastUpdate = new Date(bus.timestamp);
+                const now = new Date();
+                const minutesAgo = Math.floor((now - lastUpdate) / 60000);
+                const isActive = minutesAgo <= 5;
+                
+                // Contenu du popup
+                const popupContent = `
+                    <div style="min-width: 200px;">
+                        <h4 style="margin: 0 0 10px 0; color: ${isSimulated ? '#ff9800' : '#1a6fb4'}">
+                            <i class="fas fa-bus"></i> ${bus.device_id}
+                            ${isSimulated ? '<span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; margin-left: 5px;">Simulé</span>' : ''}
+                        </h4>
+                        <p><strong>Position:</strong></p>
+                        <p>Lat: ${bus.latitude.toFixed(6)}</p>
+                        <p>Lon: ${bus.longitude.toFixed(6)}</p>
+                        <p><strong>Vitesse:</strong> ${bus.speed ? Math.round(bus.speed) + ' km/h' : 'N/A'}</p>
+                        <p><strong>Dernière mise à jour:</strong><br>${lastUpdate.toLocaleTimeString()}</p>
+                        <p><strong>Statut:</strong> ${isActive ? '✅ Actif' : '⏸️ Inactif'}</p>
+                        <button onclick="centerOnBus('${bus.device_id}')" style="
+                            background: #1a6fb4; 
+                            color: white; 
+                            border: none; 
+                            padding: 8px 12px; 
+                            border-radius: 5px; 
+                            cursor: pointer;
+                            margin-top: 10px;
+                            width: 100%;
+                        ">
+                            <i class="fas fa-crosshairs"></i> Centrer
+                        </button>
+                    </div>
+                `;
+                
+                if (!markers[bus.device_id]) {
+                    // Créer un nouveau marqueur
+                    markers[bus.device_id] = L.marker([bus.latitude, bus.longitude], {
+                        icon: createBusIcon(isSimulated, isActive)
+                    }).addTo(map);
+                    
+                    markers[bus.device_id].bindPopup(popupContent);
+                    markers[bus.device_id].bindTooltip(bus.device_id);
+                } else {
+                    // Mettre à jour la position
+                    markers[bus.device_id].setLatLng([bus.latitude, bus.longitude]);
+                    markers[bus.device_id].setPopupContent(popupContent);
+                    markers[bus.device_id].setIcon(createBusIcon(isSimulated, isActive));
+                }
+            });
+            
+            // Supprimer les marqueurs qui n'existent plus
+            Object.keys(markers).forEach(deviceId => {
+                if (!buses.find(bus => bus.device_id === deviceId)) {
+                    map.removeLayer(markers[deviceId]);
+                    delete markers[deviceId];
+                }
+            });
+        }
+        
+        // Centrer sur un bus spécifique
+        function centerOnBus(deviceId) {
+            if (map && markers[deviceId]) {
+                const position = markers[deviceId].getLatLng();
+                map.setView(position, 15);
+                markers[deviceId].openPopup();
+                showNotification(`Centré sur ${deviceId}`);
+            } else {
+                showNotification(`Bus ${deviceId} non trouvé`, true);
+            }
+        }
+        
+        // Simuler des bus
+        async function simulateBuses() {
+            showLoading();
+            try {
+                const response = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ count: 5 })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`✅ ${data.message}`);
+                    updatePositions();
+                } else {
+                    showNotification(`❌ ${data.error}`, true);
+                }
+            } catch (error) {
+                console.error('Erreur lors de la simulation:', error);
+                showNotification('❌ Erreur de connexion au serveur', true);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Gestion du modal
+        function showAddDeviceModal() {
+            document.getElementById('addDeviceModal').style.display = 'flex';
+            if (map) {
+                const center = map.getCenter();
+                document.getElementById('deviceLat').value = center.lat.toFixed(6);
+                document.getElementById('deviceLon').value = center.lng.toFixed(6);
+            } else {
+                document.getElementById('deviceLat').value = '33.880000';
+                document.getElementById('deviceLon').value = '10.100000';
+            }
+            document.getElementById('deviceSpeed').value = Math.floor(Math.random() * 60 + 20);
+        }
+        
+        function hideAddDeviceModal() {
+            document.getElementById('addDeviceModal').style.display = 'none';
+            document.getElementById('addDeviceForm').reset();
+        }
+        
+        // Ajouter un appareil
+        document.getElementById('addDeviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            
+            const deviceId = document.getElementById('deviceId').value;
+            const lat = parseFloat(document.getElementById('deviceLat').value);
+            const lon = parseFloat(document.getElementById('deviceLon').value);
+            const speed = document.getElementById('deviceSpeed').value ? 
+                         parseFloat(document.getElementById('deviceSpeed').value) : 
+                         Math.random() * 60 + 20;
+            
+            try {
+                const response = await fetch('/api/gps', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        device_id: deviceId,
+                        latitude: lat,
+                        longitude: lon,
+                        speed: speed,
+                        direction: Math.random() * 360
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`✅ ${data.message}`);
+                    hideAddDeviceModal();
+                    updatePositions();
+                } else {
+                    showNotification(`❌ ${data.error}`, true);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('❌ Erreur de connexion au serveur', true);
+            } finally {
+                hideLoading();
+            }
+        });
+        
+        // Fermer le modal en cliquant en dehors
+        document.getElementById('addDeviceModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('addDeviceModal')) {
+                hideAddDeviceModal();
+            }
+        });
+        
+        // Initialisation
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialiser la carte après un court délai
+            setTimeout(initializeMap, 100);
+            
+            // Vérifier la connexion au serveur
+            fetch('/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Serveur connecté:', data.message);
+                })
+                .catch(error => {
+                    console.warn('Impossible de contacter le serveur:', error);
+                    showNotification('Serveur non disponible', true);
+                });
+        });
+        
+        // Nettoyer à la fermeture
+        window.addEventListener('beforeunload', () => {
+            stopUpdates();
+        });
+        
+        // Instructions de débogage
+        console.log('GPS Tracker initialisé');
+        console.log('API endpoints:');
+        console.log('  GET  /api/positions - Positions GPS');
+        console.log('  POST /api/gps - Envoyer position');
+        console.log('  POST /api/simulate - Simuler bus');
+    </script>
+</body>
+</html>
